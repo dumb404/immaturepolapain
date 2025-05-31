@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Portal</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+        }
+    
+        .container {
+            background: #ffffff;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+        }
+    
+        h2, h3 {
+            text-align: center;
+            margin: 10px 0 20px;
+            font-size: 22px;
+            color: #333;
+        }
+    
+        select, input {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s ease;
+        }
+    
+        select:focus, input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+    
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+    
+        button:hover {
+            background-color: #388e3c;
+        }
+    
+        form {
+            display: none;
+        }
+    
+        form.active {
+            display: block;
+        }
+    </style>    
+</head>
+<body>
+<div class="container">
+    <h2>Select Registration Type</h2>
+    <select id="formSelector">
+        <option value="">-- Select --</option>
+        <option value="userForm">User Registration</option>
+        <option value="adminForm">Admin Registration</option>
+    </select>
+
+    <!-- User Registration Form -->
+    <form id="userForm" class="form">
+        <h3>User Registration</h3>
+        <input type="email" id="userEmail" name="email" placeholder="Email" required>
+        <input type="text" id="userUsername" name="username" placeholder="Username" required>
+        <input type="text" id="userFirstName" name="first_name" placeholder="First Name" required>
+        <input type="text" id="userLastName" name="last_name" placeholder="Last Name" required>
+        <input type="text" id="userDrivingLicense" name="driving_license" placeholder="Driving License" required>
+        <input type="text" id="userNationalID" name="national_id" placeholder="National ID No" required>
+        <input type="text" id="userNumberPlate" name="number_plate" placeholder="Vehicle Number Plate" required>
+        <input type="text" id="userAddress" name="address" placeholder="Address" required>
+        <input type="text" id="userGPSTracker" name="gps_tracker_no" placeholder="GPS Tracker No" required>
+        <input type="password" id="userPassword" name="password" placeholder="Password" required>
+        <input type="password" id="userConfirmPassword" name="confirm_password" placeholder="Confirm Password" required>
+        <select name="country" id="userCountry" required>
+            <option value="">Select Country</option>
+            <option value="India">India</option>
+            <option value="USA">USA</option>
+            <option value="UK">UK</option>
+        </select>
+        <input type="text" id="userEmergencyContact" name="emergency_contact_number" placeholder="User Emergency Contact Number">
+        <input type="text" id="userRelativeEmergencyContact" name="emergency_contact_number_of_a_related_person" placeholder="Emergency Contact Number Of Relatives">
+        <button type="submit">Register</button>
+    </form>
+
+    <!-- Admin Registration Form -->
+    <form id="adminForm" class="form">
+        <h3>Admin Registration</h3>
+        <input type="email" id="adminEmail" name="email" placeholder="Email" required>
+        <input type="text" id="adminUsername" name="username" placeholder="Username" required>
+        <select name="admin_type" required>
+            <option value="">Select Type</option>
+            <option value="Hospital">Hospital</option>
+            <option value="Police">Police Station</option>
+            <option value="Mechanic">Mechanic Shop</option>
+            <option value="OGs">OGs</option>
+        </select>
+        <select name="country" id="adminCountry" required onchange="updatePhoneCode('admin')">
+            <option value="">Select Country</option>
+            <option value="India" data-code="+91">India</option>
+            <option value="USA" data-code="+1">USA</option>
+            <option value="UK" data-code="+44">UK</option>
+        </select>
+        <input type="text" id="adminEmergencyCode" name="emergency_response" placeholder="Emergency Response Number" required>
+        <input type="text" name="service_info" placeholder="Service Info">
+        <input type="text" id="latitude" name="latitude" placeholder="Latitude" readonly>
+        <input type="text" id="longitude" name="longitude" placeholder="Longitude" readonly>
+        <input type="password" name="password" placeholder="Password" required>
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+        <button type="submit">Register</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('formSelector').addEventListener('change', function () {
+        document.querySelectorAll('.form').forEach(form => form.classList.remove('active'));
+        const selected = this.value;
+        if (selected) {
+            document.getElementById(selected).classList.add('active');
+        }
+    });
+
+    function updatePhoneCode(type) {
+        const select = document.getElementById(type === 'user' ? 'userCountry' : 'adminCountry');
+        const selectedOption = select.options[select.selectedIndex];
+        const code = selectedOption.getAttribute('data-code');
+        document.getElementById(type === 'user' ? 'userEmergencyCode' : 'adminEmergencyCode').value = code || '';
+    }
+
+    // Auto fetch geolocation for admin
+    window.onload = function () {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                document.getElementById('latitude').value = position.coords.latitude;
+                document.getElementById('longitude').value = position.coords.longitude;
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    };
+
+    // Handle user form submission
+    document.getElementById('userForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const formObject = {};
+        formData.forEach((value, key) => {
+            formObject[key] = value;
+        });
+
+        const response = await fetch('http://localhost:3000/register-user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formObject),
+        });
+
+        const result = await response.text();
+        alert(result);
+    });
+
+    // Handle admin form submission
+    document.getElementById('adminForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const formObject = {};
+        formData.forEach((value, key) => {
+            formObject[key] = value;
+        });
+
+        const response = await fetch('http://localhost:3000/register-admin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formObject),
+        });
+
+        const result = await response.text();
+        alert(result);
+    });
+</script>
+</body>
+</html>
